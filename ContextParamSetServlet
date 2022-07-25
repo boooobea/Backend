@@ -1,0 +1,82 @@
+package org.zerock.myapp;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import lombok.Cleanup;
+import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
+@NoArgsConstructor
+@WebServlet("/ContextParamSet")
+public class ContextParamSetServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	private String driver;
+	private String savePath;
+	
+	@Override
+	public void init(ServletConfig config) 
+			throws ServletException {
+		log.trace("init( config ) invoked.");
+		
+		super.init(config);
+		
+		ServletContext sc = getServletContext();
+//		ServletContext sc = config.getServletContext();
+//		log.info("sc1 : {}, sc : {}", sc1, sc);
+		
+		this.driver = sc.getInitParameter("driver");
+		this.savePath = sc.getInitParameter("savePath");
+		log.info("driver : {}, savePath : {} ", driver, savePath);	
+				
+// 		Servlet 공용Method
+//		sc.setAttribute(name, value);		//Application Scope에 공유데이터 올려놓음
+//		sc.getAttribute(value);				//공유 데이터 가져옴
+//		sc.removeAttribute(name);			//공유 데이터 삭제 
+
+		sc.setAttribute("driver", driver);
+		sc.setAttribute("savaPath", savePath);
+
+		log.info("upload done.");
+	}//init
+
+	@Override
+	public void destroy() {
+		log.trace("destroy() invoked.");
+		
+	}//destroy
+
+	@Override
+	protected void service(HttpServletRequest req, HttpServletResponse res) 
+			throws ServletException, IOException {
+		log.trace("service( req , res ) invoked.");
+
+		res.setContentType("text/html; charset=utf8");
+		
+		log.info("1. "+ this.getServletContext());
+		log.info("2. "+ this.getServletContext().getInitParameter("driver"));
+		log.info("3. "+ this.getServletContext().getInitParameter("savePath"));
+
+		
+		
+//		-----
+		@Cleanup
+		PrintWriter out = res.getWriter();
+		
+		out.println("1. driver : " + this.driver  + "<br>");
+		out.println("2. savePath : " + this.savePath + "<br>");		
+		
+		out.flush();
+	}//service
+
+}//end class
